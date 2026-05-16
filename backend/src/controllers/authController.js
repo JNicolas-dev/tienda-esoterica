@@ -1,28 +1,80 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const Usuario = require('../models/usuario');
 
 exports.register = async (req, res) => {
-  const { nombre, email, password } = req.body;
 
-  const hashed = await bcrypt.hash(password, 10);
+  try {
 
-  const user = new User({ nombre, email, password: hashed });
-  await user.save();
+    const usuario = await Usuario.create({
 
-  res.json({ mensaje: 'Usuario registrado' });
+      nombre: req.body.nombre,
+      email: req.body.email,
+      password: req.body.password,
+      rol: 'cliente'
+
+    });
+
+    res.json({
+
+      message: 'Usuario registrado',
+
+      usuario
+
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json(error);
+  }
+
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ mensaje: 'Usuario no existe' });
+  try {
 
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return res.status(400).json({ mensaje: 'Contraseña incorrecta' });
+    const usuario = await Usuario.findOne({
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      where: {
+        email: req.body.email
+      }
 
-  res.json({ token });
+    });
+
+    if (!usuario) {
+
+      return res.status(404).json({
+
+        message: 'Usuario no encontrado'
+
+      });
+
+    }
+
+    if (usuario.password !== req.body.password) {
+
+      return res.status(400).json({
+
+        message: 'Contraseña incorrecta'
+
+      });
+
+    }
+
+    res.json({
+
+      message: 'Login exitoso',
+
+      usuario
+
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json(error);
+  }
+
 };
