@@ -1,14 +1,24 @@
-const Usuario = require('../models/usuario');
+const Usuario = require('../models/Usuario');
+
+const bcrypt = require('bcryptjs');
 
 exports.register = async (req, res) => {
 
   try {
 
+    const passwordHash = await bcrypt.hash(
+      req.body.password,
+      10
+    );
+
     const usuario = await Usuario.create({
 
       nombre: req.body.nombre,
+
       email: req.body.email,
-      password: req.body.password,
+
+      password: passwordHash,
+
       rol: 'cliente'
 
     });
@@ -26,6 +36,7 @@ exports.register = async (req, res) => {
     console.log(error);
 
     res.status(500).json(error);
+
   }
 
 };
@@ -52,7 +63,15 @@ exports.login = async (req, res) => {
 
     }
 
-    if (usuario.password !== req.body.password) {
+    const passwordCorrecta = await bcrypt.compare(
+
+      req.body.password,
+
+      usuario.password
+
+    );
+
+    if (!passwordCorrecta) {
 
       return res.status(400).json({
 
@@ -75,6 +94,7 @@ exports.login = async (req, res) => {
     console.log(error);
 
     res.status(500).json(error);
+
   }
 
 };

@@ -1,27 +1,27 @@
 const express = require('express');
+
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+const productosController = require('../controllers/productos.controller');
 
-  const productos = [
-    {
-      id: 1,
-      nombre: 'Retorno de pareja',
-      descripcion: 'Trabajo espiritual fuerte',
-      precio: 100000,
-      categoria: 'amor'
-    },
+router.get(
+  '/',
+  productosController.getProductos
+);
 
-    {
-      id: 2,
-      nombre: 'Limpieza espiritual',
-      descripcion: 'Elimina malas energías',
-      precio: 80000,
-      categoria: 'proteccion'
-    }
-  ];
+router.post(
+  '/',
+  productosController.createProducto
+);
 
-  res.json(productos);
-});
+router.put(
+  '/:id',
+  productosController.updateProducto
+);
+
+router.delete(
+  '/:id',
+  productosController.deleteProducto
+);
 
 module.exports = router;
